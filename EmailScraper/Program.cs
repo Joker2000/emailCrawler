@@ -32,12 +32,27 @@ namespace EmailScraper
             Stopwatch.Start();
             FindAllEmailsInDomain(Url);
             Stopwatch.Stop();
-            Console.WriteLine($"{Stopwatch.Elapsed.Minutes}mins {Stopwatch.Elapsed.Seconds}secs elapsed");
             WriteResults();
             Console.Read();
         }
 
+        private static void WriteResultsToConsole()
+        {
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine("Emails:");
+            SiteEmails.ToList().ForEach(Console.WriteLine);
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine($"Found {SiteEmails.Count} emails");
+            Console.WriteLine($"{Stopwatch.Elapsed.Minutes}mins {Stopwatch.Elapsed.Seconds}secs elapsed");
+        }
+
         private static void WriteResults()
+        {
+            WriteResultsToConsole();
+            WriteResultsToFile();
+        }
+
+        private static void WriteResultsToFile()
         {
             File.WriteAllText(Environment.CurrentDirectory + $@"\{GetDomain(Url)}.results", $"{Stopwatch.Elapsed.Minutes}mins {Stopwatch.Elapsed.Seconds}secs elapsed" + Environment.NewLine);
             File.AppendAllLines(Environment.CurrentDirectory + $@"\{GetDomain(Url)}.results", SiteEmails);
@@ -90,7 +105,7 @@ namespace EmailScraper
         {
             foreach (var email in emails)
             {
-                SiteEmails.Add(email.Trim());
+                SiteEmails.Add(email.Trim().ToLower());
             }
         }
 
@@ -127,7 +142,8 @@ namespace EmailScraper
 
             var urls =
                 anchors.Where(x => !x.Attributes["href"].Value.Contains("mailto:"))
-                    .Select(x => x.Attributes["href"].Value).ToList();
+                    .Select(x => x.Attributes["href"].Value)
+                    .ToList();
 
             urls = AddBaseUrlToRelativeUrl(baseUrl, urls).ToList();
             urls = RemoveInvalidUrls(urls);
