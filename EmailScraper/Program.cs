@@ -13,6 +13,7 @@ namespace EmailScraper
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
+    using System.IO;
     using System.Linq;
     using System.Net;
 
@@ -24,15 +25,22 @@ namespace EmailScraper
         private const string Url = "https://www.churchill.com";
         private static readonly HashSet<string> SiteUrls = new HashSet<string>();
         private static readonly HashSet<string> SiteEmails = new HashSet<string>();
-        
+        private static readonly Stopwatch Stopwatch = Stopwatch.StartNew();
+
         public static void Main(string[] args)
         {
-            var stopwatch = Stopwatch.StartNew();
-            stopwatch.Start();
+            Stopwatch.Start();
             FindAllEmailsInDomain(Url);
-            stopwatch.Stop();
-            Console.WriteLine($"{stopwatch.Elapsed.Minutes}mins {stopwatch.Elapsed.Seconds}secs elapsed");
+            Stopwatch.Stop();
+            Console.WriteLine($"{Stopwatch.Elapsed.Minutes}mins {Stopwatch.Elapsed.Seconds}secs elapsed");
+            WriteResults();
             Console.Read();
+        }
+
+        private static void WriteResults()
+        {
+            File.WriteAllText(Environment.CurrentDirectory + $@"\{GetDomain(Url)}.results", $"{Stopwatch.Elapsed.Minutes}mins {Stopwatch.Elapsed.Seconds}secs elapsed" + Environment.NewLine);
+            File.AppendAllLines(Environment.CurrentDirectory + $@"\{GetDomain(Url)}.results", SiteEmails);
         }
 
         private static void FindAllEmailsInDomain(string url)
@@ -146,14 +154,13 @@ namespace EmailScraper
 
         private static List<string> RemoveUrlsFromDifferentDomains(string baseUrl, IEnumerable<string> urls)
         {
-            Uri baseUri;
-            Uri.TryCreate(baseUrl, UriKind.Absolute, out baseUri);
+            var domain = GetDomain(baseUrl);
             var currentDomainUrls = new List<string>();
             foreach (var url in urls)
             {
                 Uri temporaryUri;
                 Uri.TryCreate(url, UriKind.Absolute, out temporaryUri);
-                if (string.Equals(baseUri.Host, temporaryUri.Host))
+                if (string.Equals(domain, temporaryUri.Host))
                 {
                     currentDomainUrls.Add(url);
                 }
@@ -161,6 +168,14 @@ namespace EmailScraper
 
             return currentDomainUrls;
         }
+
+        private static string GetDomain(string url)
+        {
+            Uri baseUri;
+            Uri.TryCreate(url, UriKind.Absolute, out baseUri);
+            return baseUri.Host;
+        }
+
 
         private static List<string> RemoveInvalidUrls(List<string> urls)
         {
