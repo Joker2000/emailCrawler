@@ -10,6 +10,7 @@ namespace EmailScraper.Wrappers
     private const string Workbook = "Results";
     private const string EmailColumn = "Email Addresses";
     private const string UrlColumn = "URLs";
+    private const string BrokenUrlColumn = "Broken URLs";
 
     public static void CreateFile()
     {
@@ -29,13 +30,24 @@ namespace EmailScraper.Wrappers
       }
     }
 
-    public static void AddUrlsToWorkbook(IEnumerable<string> urls)
+    public static void AddBrokenUrlsToWorkbook(IEnumerable<string> urls)
     {
-      workbook.Worksheets[Workbook].Cells["C1"].Value = UrlColumn;
+      workbook.Worksheets[Workbook].Cells["C1"].Value = BrokenUrlColumn;
       var i = 3;
       foreach (var url in urls)
       {
         workbook.Worksheets[Workbook].Cells[$"C{i}"].Value = url;
+        i++;
+      }
+    }
+
+    public static void AddUrlsToWorkbook(IEnumerable<string> urls)
+    {
+      workbook.Worksheets[Workbook].Cells["E1"].Value = UrlColumn;
+      var i = 3;
+      foreach (var url in urls)
+      {
+        workbook.Worksheets[Workbook].Cells[$"E{i}"].Value = url;
         i++;
       }
     }

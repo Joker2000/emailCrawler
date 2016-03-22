@@ -24,11 +24,12 @@ namespace EmailScraper.Wrappers
             File.AppendAllLines(Environment.CurrentDirectory + $@"\{domain}.results", siteEmails);
         }
 
-      public static void WriteResultsToSpreadSheet(string domain, IReadOnlyCollection<string> emails, IReadOnlyCollection<string> urls)
+      public static void WriteResultsToSpreadSheet(string domain, IReadOnlyCollection<string> emails, IReadOnlyCollection<string> urls, IReadOnlyCollection<string> brokenUrls)
       {
         SpreadSheetWrapper.CreateFile();
         SpreadSheetWrapper.AddEmailsToWorkbook(emails);
         //SpreadSheetWrapper.AddUrlsToWorkbook(urls);
+        SpreadSheetWrapper.AddBrokenUrlsToWorkbook(brokenUrls);
         SpreadSheetWrapper.SaveFile(Environment.CurrentDirectory + $@"\{domain}.xlsx");
       }
     }

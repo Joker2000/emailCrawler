@@ -7,6 +7,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using System.Runtime.CompilerServices;
+
 namespace EmailScraper
 {
   using System;
@@ -25,6 +27,7 @@ namespace EmailScraper
     private const string Url = "https://www.churchill.com";
     private static readonly HashSet<string> SiteUrls = new HashSet<string>();
     private static readonly HashSet<string> SiteEmails = new HashSet<string>();
+    private static readonly HashSet<string> BrokenUrls = new HashSet<string>();
     private static readonly Stopwatch Stopwatch = Stopwatch.StartNew();
 
     public static void Main(string[] args)
@@ -33,7 +36,7 @@ namespace EmailScraper
       FindAllEmailsInDomain(Url);
       Stopwatch.Stop();
       WriteResults();
-      Console.Read();
+      //Console.Read();
     }
 
     private static void WriteResults()
@@ -41,7 +44,7 @@ namespace EmailScraper
       var domain = DocumentParser.GetDomain(Url);
       ConsoleWrapper.WriteResultsToConsole(SiteEmails, Stopwatch);
       FileWrapper.WriteResultsToFile(Stopwatch, domain, SiteEmails);
-      FileWrapper.WriteResultsToSpreadSheet(domain, SiteEmails, SiteUrls);
+      FileWrapper.WriteResultsToSpreadSheet(domain, SiteEmails, SiteUrls, BrokenUrls);
     }
 
     private static void FindAllEmailsInDomain(string url)
@@ -70,12 +73,15 @@ namespace EmailScraper
         {
           case HttpStatusCode.NotFound:
             Console.WriteLine($"HTTP 404: {url}");
+            BrokenUrls.Add(url);
             return;
           case HttpStatusCode.InternalServerError:
             Console.WriteLine($"Internal Server Error 500: {url}");
+            BrokenUrls.Add(url);
             return;
           case HttpStatusCode.BadRequest:
             Console.WriteLine($"Bad Request 400: {url}");
+            BrokenUrls.Add(url);
             return;
           case HttpStatusCode.Redirect:
             Console.WriteLine($"Redirect 302: {url}");
