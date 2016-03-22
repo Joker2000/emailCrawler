@@ -23,5 +23,13 @@ namespace EmailScraper.Wrappers
             File.WriteAllText(Environment.CurrentDirectory + $@"\{domain}.results", $"{stopwatch.Elapsed.Minutes}mins {stopwatch.Elapsed.Seconds}secs elapsed" + Environment.NewLine);
             File.AppendAllLines(Environment.CurrentDirectory + $@"\{domain}.results", siteEmails);
         }
+
+      public static void WriteResultsToSpreadSheet(string domain, IReadOnlyCollection<string> emails, IReadOnlyCollection<string> urls)
+      {
+        SpreadSheetWrapper.CreateFile();
+        SpreadSheetWrapper.AddEmailsToWorkbook(emails);
+        //SpreadSheetWrapper.AddUrlsToWorkbook(urls);
+        SpreadSheetWrapper.SaveFile(Environment.CurrentDirectory + $@"\{domain}.xlsx");
+      }
     }
 }
